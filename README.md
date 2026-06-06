@@ -1,4 +1,4 @@
-# Cancer Classification Pipeline
+# Pan Cancer Classification Pipeline
 
 Multi-class, three-class, and binary classification of cancer types using RNA-seq gene expression data (TCGA Pan-Cancer dataset). All three tasks run from a single unified pipeline.
 
