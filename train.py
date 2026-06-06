@@ -82,7 +82,8 @@ def init_experiment(train_mapped, target_col):
 # ── Single model training (original + tuned) ──────────────────────────────────
 def run_model(model_id, task_label, class_names,
               X_test, y_test, test_mapped, dirs,
-              all_classwise, mean_results, mean_results_tuned, all_results):
+              all_classwise, mean_results, mean_results_tuned, all_results,
+              n_trials=10):
 
     n_classes = len(class_names)
     print(f"\n  ----- {model_id} -----")
@@ -123,7 +124,7 @@ def run_model(model_id, task_label, class_names,
     # ── Tuned ─────────────────────────────────────────────────────────────────
     print(f"    Tuning {model_id}...")
     start = time.time()
-    tuned_model = tune_model(created_model, search_library='optuna')
+    tuned_model = tune_model(created_model, search_library='optuna', n_iter=n_trials)
     tuning_time = time.time() - start
 
     tuned_name = f"{model_id}_{task_label}_tuned"
@@ -168,7 +169,7 @@ def run_model(model_id, task_label, class_names,
 
 
 # ── Full pipeline for one task ────────────────────────────────────────────────
-def run_task(task_name):
+def run_task(task_name, n_trials=10):
     task_cfg   = TASK_CONFIGS[task_name]
     task_label = task_cfg['label']
     class_names = list(task_cfg['target_mapping'].keys())
@@ -192,7 +193,8 @@ def run_task(task_name):
             all_classwise, mean_results, mean_results_tuned, all_results = run_model(
                 model_id, task_label, class_names,
                 X_test, y_test, test_mapped, dirs,
-                all_classwise, mean_results, mean_results_tuned, all_results
+                all_classwise, mean_results, mean_results_tuned, all_results,
+                n_trials=n_trials
             )
         except Exception as e:
             print(f"    ERROR [{model_id}]: {e}")
@@ -221,12 +223,18 @@ def main():
         default='all',
         help="Which classification task to run (default: all)"
     )
+    parser.add_argument(
+        '--optuna_itr',
+        type=int,
+        default=10,
+        help="Number of Optuna iterations for hyperparameter tuning (default: 10)"
+    )
     args = parser.parse_args()
 
     tasks = list(TASK_CONFIGS.keys()) if args.task == 'all' else [args.task]
 
     for task in tasks:
-        run_task(task)
+        run_task(task, n_trials=args.optuna_itr)
 
     print("\n✓ Pipeline complete.")
 
