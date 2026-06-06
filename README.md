@@ -65,7 +65,7 @@ cp your_test.csv  data/test.csv
 
 ```bash
 # Run a specific task
-python train.py --task multiclass
+python train.py --task multiclass  --optuna_itr 15       # # defaults to 10
 python train.py --task three_class
 python train.py --task binary
 
